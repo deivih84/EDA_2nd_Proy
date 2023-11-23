@@ -65,6 +65,7 @@ public class CeldaAvanzada implements Celda {
         hayCortoCircuito = false;
 
         resetVisitados();
+
     }
 
     /**
