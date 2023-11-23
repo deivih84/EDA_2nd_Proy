@@ -40,7 +40,6 @@ public class EDA2324 {
                 celda.RayoCosmico(i, j);
                 num_rayos++;
             }
-
             long tpo2 = System.nanoTime();
             tpo_total += tpo2 - tpo1;
             System.out.print("#");
