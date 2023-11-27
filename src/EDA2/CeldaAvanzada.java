@@ -95,17 +95,18 @@ public class CeldaAvanzada implements Celda {
         return s.toString();
     }//toString
 
-    /**
-     * Una función void muy sencilla, simplemente resetea todos los valores de la matriz visitados a falso. Es una
-     * función porque se necesita en varios puntos del código.
-     */
-    public void resetVisitados() {
-        for (int i = 0; i < visitado.length; i++) {
-            for (int j = 0; j < visitado.length; j++)
-                visitado[i][j] = false;
-            //for j
-        }//for i
-    }
+
+//    /**
+//     * Una función void muy sencilla, simplemente resetea todos los valores de la matriz visitados a falso. Es una
+//     * función porque se necesita en varios puntos del código.
+//     */
+//    public void resetVisitados() {
+//        for (int i = 0; i < visitado.length; i++) {
+//            for (int j = 0; j < visitado.length; j++)
+//                visitado[i][j] = false;
+//            //for j
+//        }//for i
+//    }
 }//class
 
 class DisjointSet {
