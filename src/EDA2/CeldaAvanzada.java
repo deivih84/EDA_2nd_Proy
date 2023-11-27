@@ -6,17 +6,16 @@
 
 package EDA2;
 
-import java.util.Arrays;
-import java.util.Objects;
+
 
 public class CeldaAvanzada implements Celda {
-    private boolean[][] conductor;
-    private boolean[][] visitado;
+    private DisjointSet[][] conductor;
+    //private boolean[][] visitado;
     private boolean hayCortoCircuito;
     private int iAnterior, jAnterior; //Variables para el toString
     private boolean filaSuperior, filaInferior; //Booleanos para comprobar si hay cortocircuito
-    private final int[] vecinosX = {-1, -1, -1, 0, 0, 1, 1, 1, -2, 0, +2, 0}; //Arrays finales para recorrer las celdas vecinas a estudiar
-    private final int[] vecinosY = {-1, 0, 1, -1, 1, -1, 0, 1, 0, +2, 0, -2};
+    private final int[] vecinosX = {-1, -1, -1, 0, 0, 1, 1, 1}; //Arrays finales para recorrer las celdas vecinas a estudiar
+    private final int[] vecinosY = {-1, 0, 1, -1, 1, -1, 0, 1};
 
 
     public CeldaAvanzada() {
@@ -29,14 +28,14 @@ public class CeldaAvanzada implements Celda {
      * @param n Tamaño de las matrices
      */
     public void Inicializar(int n) {
-        conductor = new boolean[n][n];
-        visitado = new boolean[n][n];
+        conductor = new DisjointSet[n][n];
+        //visitado = new boolean[n][n];
         filaSuperior = false;
         filaInferior = false;
         hayCortoCircuito = false;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++)
-                conductor[i][j] = visitado[i][j] = false;
+                conductor[i][j] = null;
             //for j
         }//for i
     }//Inicializar
@@ -66,6 +65,12 @@ public class CeldaAvanzada implements Celda {
 
         resetVisitados();
 
+        DisjointSet disjointSet = new DisjointSet(conductor.length * conductor.length, fil, col);
+        for (int i = 0; i < vecinosX.length; i++) {
+            if (conductor[vecinosX[i]][vecinosY[i]] != null){
+
+            }
+        }
     }
 
     /**
@@ -101,17 +106,55 @@ public class CeldaAvanzada implements Celda {
             //for j
         }//for i
     }
-
-
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(hayCortoCircuito, iAnterior, jAnterior, filaSuperior, filaInferior);
-        result = 31 * result + Arrays.hashCode(conductor);
-        result = 31 * result + Arrays.hashCode(visitado);
-        result = 31 * result + Arrays.hashCode(vecinosX);
-        result = 31 * result + Arrays.hashCode(vecinosY);
-        return result;
-    }
 }//class
+
+class DisjointSet {
+    private int[] parent;
+    private int[] rank;
+
+    private int[] posicion;
+    private int size;
+
+    public DisjointSet(int size, int x, int y) {
+        parent = new int[size];
+        rank = new int[size];
+        posicion = new int[2];
+        posicion[0] = x;
+        posicion[1] = y;
+        this.size = size;
+        makeSet();
+    }
+
+    private void makeSet() {
+        for (int i = 0; i < parent.length; i++) {
+            parent[i] = i;
+            rank[i] = 0;
+        }
+    }
+
+    public int find(int x) { //Se usa para encontrar al padre de cada disjoint set.
+        if (x != parent[x]) {
+            parent[x] = find(parent[x]);
+        }
+        return parent[x];
+    }
+
+    public void union(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+
+        if (rootX != rootY) {
+            if (rank[rootX] > rank[rootY]) {
+                parent[rootY] = rootX;
+            } else if (rank[rootX] < rank[rootY]) {
+                parent[rootX] = rootY;
+            } else {
+                parent[rootY] = rootX;
+                rank[rootX]++;
+            }
+        }
+    }
+}
+
 
 
