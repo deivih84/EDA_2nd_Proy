@@ -9,8 +9,8 @@ package EDA2;
 
 
 public class CeldaAvanzada implements Celda {
-    private DisjointSet[][] conductor;
-    //private boolean[][] visitado;
+    private boolean[][] conductor;
+    private boolean[][] visitado;
     private boolean hayCortoCircuito;
     private int iAnterior, jAnterior; //Variables para el toString
     private boolean filaSuperior, filaInferior; //Booleanos para comprobar si hay cortocircuito
@@ -28,17 +28,18 @@ public class CeldaAvanzada implements Celda {
      * @param n Tamaño de las matrices
      */
     public void Inicializar(int n) {
-        conductor = new DisjointSet[n][n];
-        //visitado = new boolean[n][n];
+        conductor = new boolean[n][n];
+        visitado = new boolean[n][n];
         filaSuperior = false;
         filaInferior = false;
         hayCortoCircuito = false;
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++)
-                conductor[i][j] = null;
-            //for j
-        }//for i
-    }//Inicializar
+            for (int j = 0; j < n; j++) {
+                //conductor[i][j] = null;
+                //for j
+            }//for i
+        }//Inicializar
+    }
 
     /**
      * Simplemente implementado para devolver un booleano.
@@ -57,18 +58,21 @@ public class CeldaAvanzada implements Celda {
      * @param col Position actual en el eje y de la celda en la matriz de conductores.
      */
     public void RayoCosmico(int fil, int col) {
-        filaSuperior = false;
-        filaInferior = false;
         iAnterior = fil;
         jAnterior = col;
         hayCortoCircuito = false;
+        int sigCeldaX, sigCeldaY;
 
-        resetVisitados();
+        //resetVisitados();
 
-        DisjointSet disjointSet = new DisjointSet(conductor.length * conductor.length, fil, col);
-        for (int i = 0; i < vecinosX.length; i++) {
-            if (conductor[vecinosX[i]][vecinosY[i]] != null){
-
+        DisjointSet disjointSet = new DisjointSet(conductor.length * conductor.length);
+        conductor[fil][col] = true; //Al caer el rayo la celda pasa a ser conductora
+        for (int i = 0; i < vecinosX.length; i++) { //Registrar a todos los vecinos llamando dde forma recursiva.
+            sigCeldaX = fil + vecinosX[i];
+            sigCeldaY = col + vecinosY[i];
+            if (!(sigCeldaX < 0 || sigCeldaY < 0 || sigCeldaX >= conductor.length || sigCeldaY >= conductor[0].length)) { // || visitado[sigCeldaX][sigCeldaY]
+                if (conductor[fil + vecinosX[i]] [col + vecinosY[i]])
+                    disjointSet.union(fil * conductor.length + col, (fil + vecinosX[i]) * conductor.length + (col + vecinosY[i]));
             }
         }
     }
@@ -109,49 +113,92 @@ public class CeldaAvanzada implements Celda {
 //    }
 }//class
 
+class RangosMinimosYMaximos {
+    private int rango;
+    private int max;
+    private int min;
+
+    public RangosMinimosYMaximos(int rango, int max, int min) {
+        this.rango = rango;
+        this.max = max;
+        this.min = min;
+    }
+
+    public int getRango() {
+        return rango;
+    }
+    public int getMax() {
+        return max;
+    }
+    public int getMin() {
+        return min;
+    }
+
+    public void incrementarRango() {
+        this.rango++;
+    }
+    public void setRango(int rango) {
+        this.rango = rango;
+    }
+    public void setMax(int max) {
+        this.max = max;
+    }
+    public void setMin(int min) {
+        this.min = min;
+    }
+}
+
+
 class DisjointSet {
     private int[] parent;
-    private int[] rank;
-
-    private int[] posicion;
+    private RangosMinimosYMaximos[] rangosMinsMax;
+    private int max;
+    private int min;
     private int size;
 
-    public DisjointSet(int size, int x, int y) {
+    public DisjointSet(int size) {
         parent = new int[size];
-        rank = new int[size];
-        posicion = new int[2];
-        posicion[0] = x;
-        posicion[1] = y;
+        rangosMinsMax = new RangosMinimosYMaximos[size];
         this.size = size;
+        inicializarRangos();
         makeSet();
     }
 
     private void makeSet() {
         for (int i = 0; i < parent.length; i++) {
             parent[i] = i;
-            rank[i] = 0;
+            rangosMinsMax[i].setRango(0);
         }
     }
 
-    public int find(int x) { //Se usa para encontrar al padre de cada disjoint set.
+    private void inicializarRangos() {
+        for (int i = 0; i < rangosMinsMax.length; i++) {
+            rangosMinsMax[i].setMax(i / (int) (Math.sqrt(rangosMinsMax.length)));
+            rangosMinsMax[i].setMin(i / (int) (Math.sqrt(rangosMinsMax.length)));
+        }
+    }
+
+    // fil * conductor.length + col (Posición por fila y columna)
+
+    public int findUParent(int x) { //Se usa para encontrar al padre de cada disjoint set.
         if (x != parent[x]) {
-            parent[x] = find(parent[x]);
+            parent[x] = findUParent(parent[x]); // APLICAR PATH COMPRESSION parent[i] = find(i);
         }
         return parent[x];
     }
 
-    public void union(int x, int y) {
-        int rootX = find(x);
-        int rootY = find(y);
+    public void union(int nuevaCelda, int celdaYaExistente) { ///////////////////////////////////////
+        int rootX = findUParent(nuevaCelda);
+        int rootY = findUParent(celdaYaExistente);
 
         if (rootX != rootY) {
-            if (rank[rootX] > rank[rootY]) {
+            if (rangosMinsMax[rootX].getRango() > rangosMinsMax[rootY].getRango()) {
                 parent[rootY] = rootX;
-            } else if (rank[rootX] < rank[rootY]) {
+            } else if (rangosMinsMax[rootX].getRango() < rangosMinsMax[rootY].getRango()) {
                 parent[rootX] = rootY;
             } else {
                 parent[rootY] = rootX;
-                rank[rootX]++;
+                rangosMinsMax[rootX].incrementarRango();
             }
         }
     }
