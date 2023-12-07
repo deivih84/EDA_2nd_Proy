@@ -202,6 +202,11 @@ class DisjointSet {
             }
         }
     }
+
+    public void actualizarMinMax(int hijo, int padre) {
+        //rangosMinsMax[padre].setMax() = (rangosMinsMax[hijo].getMax() > rangosMinsMax[rootX].getMax());
+
+    }
 }
 
 
