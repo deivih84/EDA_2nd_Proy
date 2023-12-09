@@ -1,6 +1,7 @@
 /*
  * Autores:
- * Carolina de las Heras Clavier
+ * Carolina de las º
+ * Heras Clavier
  * David de la Calle Azahares
  */
 
@@ -18,7 +19,7 @@ public class EDA2324 {
         Random rnd = new Random(SEMILLA);
         Scanner teclado = new Scanner(System.in);
         System.out.print("¿Validación? [S/N] ");
-        boolean validar = teclado.nextLine().startsWith("S");
+        boolean validar = teclado.nextLine().toUpperCase().startsWith("S");
         System.out.print("Tamaño (n) = ");
         int n = teclado.nextInt();
         int num_rep = 1;

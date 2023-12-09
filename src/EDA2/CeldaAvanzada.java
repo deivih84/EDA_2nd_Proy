@@ -7,16 +7,13 @@
 package EDA2;
 
 
-
 public class CeldaAvanzada implements Celda {
     private boolean[][] conductor;
-    private boolean[][] visitado;
     private boolean hayCortoCircuito;
     private int iAnterior, jAnterior; //Variables para el toString
-    private boolean filaSuperior, filaInferior; //Booleanos para comprobar si hay cortocircuito
     private final int[] vecinosX = {-1, -1, -1, 0, 0, 1, 1, 1}; //Arrays finales para recorrer las celdas vecinas a estudiar
     private final int[] vecinosY = {-1, 0, 1, -1, 1, -1, 0, 1};
-
+    private DisjointSet disjointSet;
 
     public CeldaAvanzada() {
     }//CeldaSimple
@@ -29,16 +26,8 @@ public class CeldaAvanzada implements Celda {
      */
     public void Inicializar(int n) {
         conductor = new boolean[n][n];
-        visitado = new boolean[n][n];
-        filaSuperior = false;
-        filaInferior = false;
         hayCortoCircuito = false;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                //conductor[i][j] = null;
-                //for j
-            }//for i
-        }//Inicializar
+        disjointSet = new DisjointSet(n * n);
     }
 
     /**
@@ -60,21 +49,20 @@ public class CeldaAvanzada implements Celda {
     public void RayoCosmico(int fil, int col) {
         iAnterior = fil;
         jAnterior = col;
-        hayCortoCircuito = false;
         int sigCeldaX, sigCeldaY;
 
-        //resetVisitados();
-
-        DisjointSet disjointSet = new DisjointSet(conductor.length * conductor.length);
-        conductor[fil][col] = true; //Al caer el rayo la celda pasa a ser conductora
-        for (int i = 0; i < vecinosX.length; i++) { //Registrar a todos los vecinos llamando dde forma recursiva.
-            sigCeldaX = fil + vecinosX[i];
-            sigCeldaY = col + vecinosY[i];
-            if (!(sigCeldaX < 0 || sigCeldaY < 0 || sigCeldaX >= conductor.length || sigCeldaY >= conductor[0].length)) { // || visitado[sigCeldaX][sigCeldaY]
-                if (conductor[fil + vecinosX[i]] [col + vecinosY[i]])
-                    disjointSet.union(fil * conductor.length + col, (fil + vecinosX[i]) * conductor.length + (col + vecinosY[i]));
+        if (!conductor[fil][col]) {
+            conductor[fil][col] = true; //Al caer el rayo la celda pasa a ser conductora
+            for (int i = 0; i < vecinosX.length; i++) { //Registrar a todos los vecinos llamando dde forma recursiva.
+                sigCeldaX = fil + vecinosX[i];
+                sigCeldaY = col + vecinosY[i];
+                if (!(sigCeldaX < 0 || sigCeldaY < 0 || sigCeldaX >= conductor.length || sigCeldaY >= conductor[0].length)) { // || visitado[sigCeldaX][sigCeldaY]
+                    if (conductor[fil + vecinosX[i]][col + vecinosY[i]])
+                        disjointSet.union(fil * conductor.length + col, (fil + vecinosX[i]) * conductor.length + (col + vecinosY[i]));
+                }
             }
         }
+        hayCortoCircuito = disjointSet.isCortocircuito();
     }
 
     /**
@@ -98,20 +86,7 @@ public class CeldaAvanzada implements Celda {
 
         return s.toString();
     }//toString
-
-
-//    /**
-//     * Una función void muy sencilla, simplemente resetea todos los valores de la matriz visitados a falso. Es una
-//     * función porque se necesita en varios puntos del código.
-//     */
-//    public void resetVisitados() {
-//        for (int i = 0; i < visitado.length; i++) {
-//            for (int j = 0; j < visitado.length; j++)
-//                visitado[i][j] = false;
-//            //for j
-//        }//for i
-//    }
-}//class
+}
 
 class RangosMinimosYMaximos {
     private int rango;
@@ -127,9 +102,11 @@ class RangosMinimosYMaximos {
     public int getRango() {
         return rango;
     }
+
     public int getMax() {
         return max;
     }
+
     public int getMin() {
         return min;
     }
@@ -137,12 +114,11 @@ class RangosMinimosYMaximos {
     public void incrementarRango() {
         this.rango++;
     }
-    public void setRango(int rango) {
-        this.rango = rango;
-    }
+
     public void setMax(int max) {
         this.max = max;
     }
+
     public void setMin(int min) {
         this.min = min;
     }
@@ -150,64 +126,66 @@ class RangosMinimosYMaximos {
 
 
 class DisjointSet {
-    private int[] parent;
+    private int[] padres;
     private RangosMinimosYMaximos[] rangosMinsMax;
-    private int max;
-    private int min;
-    private int size;
+    private boolean cortocircuito;
 
     public DisjointSet(int size) {
-        parent = new int[size];
+        padres = new int[size];
         rangosMinsMax = new RangosMinimosYMaximos[size];
-        this.size = size;
         inicializarRangos();
-        makeSet();
-    }
-
-    private void makeSet() {
-        for (int i = 0; i < parent.length; i++) {
-            parent[i] = i;
-            rangosMinsMax[i].setRango(0);
-        }
     }
 
     private void inicializarRangos() {
         for (int i = 0; i < rangosMinsMax.length; i++) {
-            rangosMinsMax[i].setMax(i / (int) (Math.sqrt(rangosMinsMax.length)));
-            rangosMinsMax[i].setMin(i / (int) (Math.sqrt(rangosMinsMax.length)));
+            rangosMinsMax[i] = new RangosMinimosYMaximos(0, i / (int) (Math.sqrt(rangosMinsMax.length)), i / (int) (Math.sqrt(rangosMinsMax.length)));
+            padres[i] = i;
         }
     }
 
     // fil * conductor.length + col (Posición por fila y columna)
 
-    public int findUParent(int x) { //Se usa para encontrar al padre de cada disjoint set.
-        if (x != parent[x]) {
-            parent[x] = findUParent(parent[x]); // APLICAR PATH COMPRESSION parent[i] = find(i);
+    public int encontrarUPadre(int x) { //Se usa para encontrar al padre "definitivo" de cada celda.
+        if (x != padres[x]) {
+            padres[x] = encontrarUPadre(padres[x]); // APLICAR PATH COMPRESSION parent[i] = find(i);
         }
-        return parent[x];
+        return padres[x];
     }
 
-    public void union(int nuevaCelda, int celdaYaExistente) { ///////////////////////////////////////
-        int rootX = findUParent(nuevaCelda);
-        int rootY = findUParent(celdaYaExistente);
+    public void union(int nuevaCelda, int celdaYaExistente) {
+        int nCelda = encontrarUPadre(nuevaCelda); //nCelda <- Nueva celda
+        int aCelda = encontrarUPadre(celdaYaExistente); //aCelda <- Antigua celda
 
-        if (rootX != rootY) {
-            if (rangosMinsMax[rootX].getRango() > rangosMinsMax[rootY].getRango()) {
-                parent[rootY] = rootX;
-            } else if (rangosMinsMax[rootX].getRango() < rangosMinsMax[rootY].getRango()) {
-                parent[rootX] = rootY;
+        if (nCelda != aCelda) {
+            if (rangosMinsMax[nCelda].getRango() > rangosMinsMax[aCelda].getRango()) {
+                padres[aCelda] = nCelda;
+                actualizarMinMax(aCelda, nCelda);
+                rangosMinsMax[nCelda].incrementarRango();
+            } else if (rangosMinsMax[nCelda].getRango() < rangosMinsMax[aCelda].getRango()) {
+                padres[nCelda] = aCelda;
+                actualizarMinMax(nCelda, aCelda);
+                rangosMinsMax[aCelda].incrementarRango();
             } else {
-                parent[rootY] = rootX;
-                rangosMinsMax[rootX].incrementarRango();
+                padres[aCelda] = nCelda;
+                rangosMinsMax[nCelda].incrementarRango();
+                actualizarMinMax(aCelda, nCelda);
             }
         }
     }
 
     public void actualizarMinMax(int hijo, int padre) {
-        //rangosMinsMax[padre].setMax() = (rangosMinsMax[hijo].getMax() > rangosMinsMax[rootX].getMax());
+        //Actualiza los valores de los mínimos y máximos si es necesario
+        if (rangosMinsMax[hijo].getMax() > rangosMinsMax[padre].getMax()) {
+            rangosMinsMax[padre].setMax(rangosMinsMax[hijo].getMax());
+        }
+        if (rangosMinsMax[hijo].getMin() < rangosMinsMax[padre].getMin()) {
+            rangosMinsMax[padre].setMin(rangosMinsMax[hijo].getMin());
+        }
+        //Verificar si se ha producido el cortocircuito
+        cortocircuito = rangosMinsMax[padre].getMin() == 0 && rangosMinsMax[padre].getMax() == (Math.sqrt(rangosMinsMax.length) - 1);
+    }
 
+    public boolean isCortocircuito() {
+        return cortocircuito;
     }
 }
-
-
-
