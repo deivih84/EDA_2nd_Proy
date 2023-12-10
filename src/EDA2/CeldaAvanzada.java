@@ -1,7 +1,9 @@
 /*
+ * 2ºIngeniería Informática UVA - Estructura de Datos y Algoritmos
  * Autores:
  * Carolina de las Heras Clavier
  * David de la Calle Azahares
+ * Grupo de laboratorio:K7
  */
 
 package EDA2;
@@ -16,10 +18,10 @@ public class CeldaAvanzada implements Celda {
     private DisjointSet disjointSet;
 
     public CeldaAvanzada() {
-    }//CeldaSimple
+    }//CeldaAvanzada
 
     /**
-     * Este método recibe el tamaño de las matrices conductor y visitado y las limpia o inicializa en todos sus valores
+     * Metodo que recibe el tamaño de las matrices conductor y visitado y las limpia o inicializa en todos sus valores
      * a falso.
      *
      * @param n Tamaño de las matrices
@@ -31,7 +33,7 @@ public class CeldaAvanzada implements Celda {
     }
 
     /**
-     * Simplemente implementado para devolver un booleano.
+     * Metodo implementado para devolver un booleano.
      *
      * @return hayCortoCircuito True si se ha encontrado camino superior e inferior
      */
