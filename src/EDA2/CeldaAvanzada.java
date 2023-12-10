@@ -143,8 +143,8 @@ class RangosMinimosYMaximos {
 
 
 class DisjointSet {
-    private int[] padres;
-    private RangosMinimosYMaximos[] rangosMinsMax;
+    private final int[] padres;
+    private final RangosMinimosYMaximos[] rangosMinsMax;
     private boolean cortocircuito;
 
     /**
@@ -174,7 +174,6 @@ class DisjointSet {
     /**
      * Se encarga de buscar recursivamente al padre de un nodo en concreto dada su posición (identificador) en el array
      * para devolver finalmente el padre de todos los padres, el que ocupa la cúspide de la relación de jerarquía.
-     *
      * Algo muy importante es que se aplica pathCompression cuando se encuentra a un padre que estaba por encima del
      * actual en el grupo. Es tan importante porque ahorra incontables iteraciones de esta función, haciendo que el
      * último padre siempre esté a una iteración como máximo
