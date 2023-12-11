@@ -8,7 +8,7 @@ package EDA2;
 
 // Simplemente, una interfaz para asegurar que se implementen todas las funciones pedidas.
 public interface Celda {
-    public void Inicializar(int n);
+    public void Inicializar(int n); /////////////////// n*m
     public void RayoCosmico(int i, int j);
     public boolean Cortocircuito();
 

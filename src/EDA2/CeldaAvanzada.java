@@ -28,9 +28,9 @@ public class CeldaAvanzada implements Celda {
      * @param n Tamaño de las matrices
      */
     public void Inicializar(int n) {
-        conductor = new boolean[n][n];
+        conductor = new boolean[n][n];  ////////////////////// n * m
         hayCortoCircuito = false;
-        disjointSet = new DisjointSet(n * n);
+        disjointSet = new DisjointSet(n * n);  ////////////////////// n * m
     }
 
     /**
@@ -81,7 +81,7 @@ public class CeldaAvanzada implements Celda {
         StringBuilder s = new StringBuilder();
 
         for (int i = 0; i < conductor.length; i++) {
-            for (int j = 0; j < conductor.length; j++)
+            for (int j = 0; j < conductor[0].length; j++)
                 if (i == iAnterior && j == jAnterior)
                     s.append("*");
                 else
@@ -146,16 +146,21 @@ class DisjointSet {
     private final int[] padres;
     private final RangosMinimosYMaximos[] rangosMinsMax;
     private boolean cortocircuito;
+    private int nFil;
+    private int nCol;
 
     /**
      * Constructor de la clase DisjointSet, llama a inicializarRangos.
-     * Recibe n, el número de elementos de la matriz (tamaño de la matriz al cuadrado)
+     * Recibe nFil y nCol, el número de elementos de la matriz
      *
-     * @param n Tamaño del DisjointSet
+     * @param nFil Nº de filas del DisjointSet
+     * @param nCol Nº de columnas del DisjointSet
      */
-    public DisjointSet(int n) {
-        padres = new int[n];
-        rangosMinsMax = new RangosMinimosYMaximos[n];
+    public DisjointSet(int nFil, int nCol) {
+        this.nFil = nFil;
+        this.nCol = nCol;
+        padres = new int[nFil * nCol];
+        rangosMinsMax = new RangosMinimosYMaximos[nFil * nCol];
         inicializarRangos();
     }
 
@@ -166,7 +171,7 @@ class DisjointSet {
      */
     private void inicializarRangos() {
         for (int i = 0; i < rangosMinsMax.length; i++) {
-            rangosMinsMax[i] = new RangosMinimosYMaximos(0, i / (int) (Math.sqrt(rangosMinsMax.length)), i / (int) (Math.sqrt(rangosMinsMax.length)));
+            rangosMinsMax[i] = new RangosMinimosYMaximos(0, i / nCol, i / nCol);
             padres[i] = i;
         }
     }
